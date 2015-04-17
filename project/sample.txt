@@ -1,0 +1,21 @@
+01: \\S ¡ú \\NP[¦ÁPL] \\VP[+FIN, ¦ÁPL]
+02: \\VP[¦ÁFIN] ¡ú \\Vi[¦ÁFIN]
+03: \\VP[¦ÁFIN] ¡ú \\Vt[¦ÁFIN] \\NP
+04: \\VP[¦ÁFIN] ¡ú \\Vdt[¦ÁFIN] \\NP1 \\NP2
+05: \\VP[¦ÁFIN] ¡ú \\Vdt[¦ÁFIN] \\NP \\PPto
+06: \\NP ¡ú \\Npr
+07: \\NP ¡ú the \\N
+08: \\PPto ¡ú to \\NP
+09: \\S ¡ú it \\V0[+FIN]
+10: \\S ¡ú \\Neg \\S
+: \\Neg ¡ú {it is not the case that}
+11: \\S ¡ú \\NP didn't \\VP[-FIN]
+12: \\VP[¦ÁFIN] ¡ú \\VP[¦ÁFIN] \\Adv
+: \\Adv ¡ú {slowly, happily, stupidly, crazily}
+13: \\VP ¡ú was \\VP[PAS]
+14: \\VP[PAS] ¡ú \\Vt[PAS] \\PPby
+15: \\VP[PAS] ¡ú \\Vdt[PAS] \\PPto \\PPby
+16: \\VP[PAS] ¡ú \\Vdt[PAS] \\NP \\PPby
+17: \\PPby ¡ú by \\NP
+:\\Vt[PAS] = {kicked, loathed, poisoned, read, eaten, liked}
+:\\Vdt[PAS] = {given}
