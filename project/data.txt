@@ -1,3 +1,21 @@
-01-34-56:\\Sv[-FIN, +PL]>\\Sv[-FIN, +PL] asd ad asd asd asd asd asd asd \\Sv[-FIN, +PL,-PL]
-
-01-34-56:\\Sv[-FIN, +PL]>{sadsad, asdasd,asdasd sadasdas}
+01:\\S¡ú\\NP[-PL] \\VP[+FIN, -PL]
+02:\\VP[+FIN]¡ú\\Vi[+FIN]
+03:\\VP[+FIN]¡ú\\Vt[+FIN] \\NP
+04:\\VP[+FIN]¡ú\\Vdt[+FIN] \\NP1 \\NP2
+05:\\VP[+FIN]¡ú\\Vdt[+FIN] \\NP \\PPto
+06:\\NP¡ú\\Npr
+07:\\NP¡úthe \\N
+08:\\PPto¡úto \\NP
+09:\\S¡úit \\V0[+FIN]
+10:\\S¡ú\\Neg \\S
+11:\\S¡ú\\NP didnt \\VP[-FIN]
+12:\\VP[+FIN]¡ú\\VP[+FIN] \\Adv
+13:\\VP¡úwas \\VP[-PL]
+14:\\VP[-PL]¡ú\\Vt[-PL] \\PPby
+15:\\VP[-PL]¡ú\\Vdt[-PL] \\PPto \\PPby
+16:\\VP[-PL]¡ú\\Vdt[-PL] \\NP \\PPby
+17:\\PPby¡úby \\NP
+18:\\Vt[-PL]¡ú{kicked, loathed, poisoned, read, eaten, liked}
+19:\\Vdt[-PL]¡ú{given}
+20:\\Neg¡ú{it is not the case that}
+21:\\Adv¡ú{slowly, happily, stupidly, crazily}

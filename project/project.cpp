@@ -6,13 +6,9 @@
 #include "stdlib.h"
 
 
-//#define DIGIT '0'||'1'||'2'||'3'||'4'||'5'||'6'||'7'||'8'||'9'
-//#define LOWER_LETTER 'a'||'b'||'c'||'d'||'e'||'f'||'g'||'h'||'i'||'j'||'k'||'l'||'m'||'n'||'o'||'p'||'q'||'r'||'s'||'t'||'u'||'v'||'w'||'x'||'y'||'z'
-//#define UPPER_LETTER 'A'||'B'||'C'||'D'||'E'||'F'||'G'||'H'||'I'||'J'||'K'||'L'||'M'||'N'||'O'||'P'||'Q'||'R'||'S'||'T'||'U'||'V'||'W'||'X'||'Y'||'Z'
-
-
 #define EOL '\n'
-#define Is_Interpreted_As '>'
+#define Is_Interpreted_As_First -95
+#define Is_Interpreted_As_Second -6
 #define Back_Slash  '\\'
 #define Blank_Space  ' '
 #define Left_Square_Bracket '['
@@ -24,12 +20,14 @@
 #define Hyphen '-'
 #define Left_Brace '{'
 #define Right_Brace '}'
+#define Syntax 0
+#define Vocabulary 1
 
 char filename[30];
 char ch;
 FILE *infile;
 int line = 1;
-
+int status = Syntax;
 
 void scanner();
 bool check_term();//term检测函数声明
@@ -39,13 +37,13 @@ bool check_term() //term检测函数定义
 	ch = fgetc(infile);
 	if (ch != Back_Slash)
 	{
-		printf("error!\n");
+		printf("error： missing a '\\' behind '\\' \n");
 		return true;
 	}
 	ch = fgetc(infile);
 	if (ch < 'A' || ch> 'Z') //检测upper_case；
 	{
-		printf("error!\n");
+		printf("error： upper_case expected behind '\\' \n");
 		return true;
 	}
 
@@ -59,13 +57,13 @@ bool check_term() //term检测函数定义
 		ch = fgetc(infile);
 		if (ch != ExplicationN && ch != ExplicationP)
 		{
-			printf("error!\n");
+			printf("error: missing a '-'or'+' behind '[' \n");
 			return true;
 		}
 		ch = fgetc(infile);
 		if (ch != 'P'&&ch != 'F')
 		{
-			printf("error!\n");
+			printf("error: 'FIN' or 'PL' expected \n");
 			return true;
 		}
 		if (ch == 'P')
@@ -73,7 +71,7 @@ bool check_term() //term检测函数定义
 			ch = fgetc(infile);
 			if (ch != 'L')
 			{
-				printf("error!\n");
+				printf("error: 'FIN' or 'PL' expected \n");
 				return true;
 			}
 		}
@@ -82,13 +80,13 @@ bool check_term() //term检测函数定义
 			ch = fgetc(infile);
 			if (ch != 'I')
 			{
-				printf("error!\n");
+				printf("error: 'FIN' or 'PL' expected \n");
 				return true;
 			}
 			ch = fgetc(infile);
 			if (ch != 'N')
 			{
-				printf("error!\n");
+				printf("error: 'FIN' or 'PL' expected \n");
 				return true;
 			}
 		}
@@ -97,7 +95,7 @@ bool check_term() //term检测函数定义
 		{
 			if (ch != Comma)
 			{
-				printf("error!\n");
+				printf("error: missing a ',' \n");
 				return true;
 			}
 			ch = fgetc(infile);
@@ -105,7 +103,7 @@ bool check_term() //term检测函数定义
 			{
 				if (ch != Blank_Space)
 				{
-					printf("error!\n");
+					printf("error: a blankspace or '-'or'+' expected behind ','\n");
 					return true;
 				}
 				else
@@ -113,7 +111,7 @@ bool check_term() //term检测函数定义
 					ch = fgetc(infile);
 					if (ch != ExplicationN&&ch != ExplicationP)
 					{
-						printf("error!\n");
+						printf("error: missing a '-'or'+' behind blankspace\n ");
 						return true;
 					}
 				}
@@ -121,7 +119,7 @@ bool check_term() //term检测函数定义
 			ch = fgetc(infile);
 			if (ch != 'P'&&ch != 'F')
 			{
-				printf("error!\n");
+				printf("error: 'FIN' or 'PL' expected \n");
 				return true;
 			}
 			if (ch == 'P')
@@ -129,7 +127,7 @@ bool check_term() //term检测函数定义
 				ch = fgetc(infile);
 				if (ch != 'L')
 				{
-					printf("error!\n");
+					printf("error: 'FIN' or 'PL' expected \n");
 					return true;
 				}
 			}
@@ -138,18 +136,19 @@ bool check_term() //term检测函数定义
 				ch = fgetc(infile);
 				if (ch != 'I')
 				{
-					printf("error!\n");
+					printf("error: 'FIN' or 'PL' expected \n");
 					return true;
 				}
 				ch = fgetc(infile);
 				if (ch != 'N')
 				{
-					printf("error!\n");
+					printf("error: 'FIN' or 'PL' expected \n");
 					return true;
 				}
 			}
 			ch = fgetc(infile);
 		}
+		ch = fgetc(infile);
 	}
 	return false;
 	//遇到 Right_Square_Bracket跳出循环；
@@ -160,7 +159,7 @@ void scanner()
 	infile = fopen("data.txt", "r");
 	while (!infile)
 	{
-		printf("error!\n");
+		printf("error: can not open file\n");
 		return;
 	}
 	ch = fgetc(infile);
@@ -178,7 +177,7 @@ void scanner()
 			}
 			if (ch == EOF)
 			{
-				printf("error!\n");
+				printf("error: can not ending with a eol\n");
 				return;
 			}
 		}
@@ -193,20 +192,20 @@ void scanner()
 					ch = fgetc(infile);
 					if (ch < '0' || ch > '9')
 					{
-						printf("error!\n");
+						printf("error: digit expected behind '-'\n");
 						return;
 					}
 				}
 			}
 			if (ch != Colon)
 			{
-				printf("error!\n");
+				printf("error: missing a ':' \n");
 				return;
 			}
 		}
 		else
 		{
-			printf("error!\n");
+			printf("error: digit expected at the beginning of a rule\n");
 			return;
 		}//检测 id 结束；
 
@@ -215,39 +214,48 @@ void scanner()
 		ch = fgetc(infile);
 		if (ch != Back_Slash)  //开始检测term;
 		{
-			printf("error!\n");
+			printf("error: '\\' expected behind ':'\n");
 			return;
 		}
 		if (check_term())
 			return;
 		//检测 term 结束；
 
-		ch = fgetc(infile);
-		if (ch != Is_Interpreted_As)
+		if (ch != Is_Interpreted_As_First)
 		{
-			printf("error!\n");
+			printf("error: '→' expected behind a term \n");
+			return;
+		}
+		ch = fgetc(infile);
+		if (ch != Is_Interpreted_As_Second)
+		{
+			printf("error: '→' expected behind a term \n");
 			return;
 		}
 		
 		ch = fgetc(infile); //开始检测 interpretation；
-		if (!((ch == Back_Slash) || (ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')||ch==Left_Brace))
+		if (!((ch == Back_Slash) || (ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')||(ch==Left_Brace)))
 		{
-			printf("error!\n");
+			printf("error: mistakes at the beginnning of interpretation\n ");
 			return;
 		}
 		while ((ch != '\n')&&ch!=EOF)
 		{
-			while ((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')|| (ch == Back_Slash)  )
+			while ((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')|| (ch == Back_Slash)  ) //syntax_interpretation;
 			{
+				if (status == Vocabulary)
+				{
+					printf("error: syntax_rule can not exist behind vocabulary_rule\n");
+					return;
+				}
 				 //检测lexical_item；
 				if (ch == Back_Slash)
 				{
 					if (check_term())
 						return;
-					ch = fgetc(infile);
 					if ((ch != '\n') && (ch != Blank_Space)&&(ch!=EOF))
 					{
-						printf("error!\n");
+						printf("error: mistakes behind a term\n");
 						return;
 					}
 					if (ch == Blank_Space)
@@ -255,7 +263,7 @@ void scanner()
 						ch = fgetc(infile);
 						if (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z') || (ch == Back_Slash)))
 						{
-							printf("error!\n");
+							printf("error: lexical_item expected behind a blankspace\n");
 							return;
 						}
 					}
@@ -268,7 +276,7 @@ void scanner()
 					} while ((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'));
 					if ((ch != '\n') && (ch != Blank_Space))
 					{
-						printf("error!\n");
+						printf("error: mistakes behind a vocabulary_item\n");
 						return;
 					}
 					if (ch == Blank_Space)
@@ -276,19 +284,20 @@ void scanner()
 						ch = fgetc(infile);
 						if (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z') || (ch == Back_Slash)))
 						{
-							printf("error!\n");
+							printf("error: vocabulary_item or term expected behind a blankspace\n");
 							return;
 						}
 					}
 				}
 			}
 
-			if (ch == Left_Brace)
+			if (ch == Left_Brace) //vocabulary_interpretation;
 			{
+				status = Vocabulary;
 				ch = fgetc(infile);
 				if (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')))
 				{
-					printf("error!\n");
+					printf("error: vocabulary_item expected behind left_brace\n");
 					return;
 				}
 				while (ch != Right_Brace)
@@ -300,7 +309,7 @@ void scanner()
 								ch = fgetc(infile);
 								if ((ch != Blank_Space) && (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'))))
 								{
-									printf("error!\n");
+									printf("error: blankspace or vocabulary_item expected behind a comma\n ");
 									return;
 								}
 								if (ch == Blank_Space)
@@ -308,7 +317,7 @@ void scanner()
 									ch = fgetc(infile);
 									if (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')))
 									{
-										printf("error!\n");
+										printf("error: vocabulary_item expected behind a blankspace\n");
 										return;
 									}
 								}
@@ -319,7 +328,7 @@ void scanner()
 							} while ((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'));
 							if ((ch != Blank_Space) && (ch != Comma) && (ch != Right_Brace))
 							{
-								printf("error!\n");
+								printf("error: mistakes behind a vocabulary_item\n");
 								return;
 							}
 							if (ch == Blank_Space)
@@ -327,7 +336,7 @@ void scanner()
 								ch = fgetc(infile);
 								if (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')))
 								{
-									printf("error!\n");
+									printf("error: vocabulary_item expected behind a blankspace\n");
 									return;
 								}
 							}
@@ -335,14 +344,14 @@ void scanner()
 
 					if (ch != Right_Brace)
 					{
-						printf("error!\n");
+						printf("error: right_brace expected\n");
 						return;
 					}
 				}
 				ch = fgetc(infile);
 				if ((ch != EOF) && (ch != '\n'))
 				{
-					printf("error!\n");
+					printf("error: mistakes behind right_brace\n");
 					return;
 				}
 			}
@@ -353,7 +362,7 @@ void scanner()
 int _tmain(int argc, _TCHAR* argv[])
 {
 	scanner();
-	printf("%d\n", line);
+	printf("line:%d\n", line);
 	return 0;
 }
 
