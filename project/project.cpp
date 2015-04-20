@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "stdio.h"
 #include "stdlib.h"
-
+#include "io.h"
 
 #define EOL '\n'
 #define Is_Interpreted_As_First -95
@@ -28,6 +28,9 @@ char ch;
 FILE *infile;
 int line = 1;
 int status = Syntax;
+struct _finddata_t fa;
+long fHandle;
+	
 
 void scanner();
 bool check_term();//term检测函数声明
@@ -95,7 +98,7 @@ bool check_term() //term检测函数定义
 		{
 			if (ch != Comma)
 			{
-				printf("error: missing a ',' \n");
+				printf("error: missing a ',' or a ']'\n");
 				return true;
 			}
 			ch = fgetc(infile);
@@ -111,7 +114,7 @@ bool check_term() //term检测函数定义
 					ch = fgetc(infile);
 					if (ch != ExplicationN&&ch != ExplicationP)
 					{
-						printf("error: missing a '-'or'+' behind blankspace\n ");
+						printf("error: missing a '-'or'+' behind blankspace\n");
 						return true;
 					}
 				}
@@ -154,14 +157,9 @@ bool check_term() //term检测函数定义
 	//遇到 Right_Square_Bracket跳出循环；
 	//检测 term 结束；
 }
-void scanner()
+void scanner(FILE *infile)
 {
-	infile = fopen("data.txt", "r");
-	while (!infile)
-	{
-		printf("error: can not open file\n");
-		return;
-	}
+	
 	ch = fgetc(infile);
 	while (ch != EOF)
 	{
@@ -236,7 +234,7 @@ void scanner()
 		ch = fgetc(infile); //开始检测 interpretation；
 		if (!((ch == Back_Slash) || (ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z')||(ch==Left_Brace)))
 		{
-			printf("error: mistakes at the beginnning of interpretation\n ");
+			printf("error: mistakes at the beginnning of interpretation\n");
 			return;
 		}
 		while ((ch != '\n')&&ch!=EOF)
@@ -309,7 +307,7 @@ void scanner()
 								ch = fgetc(infile);
 								if ((ch != Blank_Space) && (!((ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'))))
 								{
-									printf("error: blankspace or vocabulary_item expected behind a comma\n ");
+									printf("error: blankspace or vocabulary_item expected behind a comma\n");
 									return;
 								}
 								if (ch == Blank_Space)
@@ -357,12 +355,32 @@ void scanner()
 			}
 		}
 	}
-	printf("true\n"); 
+	printf("true\n");
 }
 int _tmain(int argc, _TCHAR* argv[])
 {
-	scanner();
-	printf("line:%d\n", line);
+	if ((fHandle = _findfirst("*.txt", &fa)) == -1L) 
+	{
+		printf("there is no file!\n");
+		return 0;
+	}
+	else
+	do
+	{
+		infile = fopen(fa.name, "r");
+		while (!infile)
+		{
+			printf("error: can not open file:%s\n",fa.name);
+			return 0;
+		}
+		printf("%s:\n", fa.name);
+		scanner(infile);
+		printf("line:%d\n\n", line);
+	} while (_findnext(fHandle, &fa) == 0);
+
+	_findclose(fHandle);
+		
+	
 	return 0;
 }
 

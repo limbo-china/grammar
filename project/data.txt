@@ -1,15 +1,15 @@
 01:\\S¡ú\\NP[-PL] \\VP[+FIN, -PL]
 02:\\VP[+FIN]¡ú\\Vi[+FIN]
-03:\\VP[+FIN]¡ú\\Vt[+FIN] \\NP
-04:\\VP[+FIN]¡ú\\Vdt[+FIN] \\NP1 \\NP2
+03:\\VP[-PL]¡ú\\Vt[+FIN] \\NP
+04:\\VP[+FIN]¡ú\\Vdt[-PL] \\NP1 \\NP2
 05:\\VP[+FIN]¡ú\\Vdt[+FIN] \\NP \\PPto
 06:\\NP¡ú\\Npr
 07:\\NP¡úthe \\N
 08:\\PPto¡úto \\NP
-09:\\S¡úit \\V0[+FIN]
+09:\\S¡úit \\V0[+PL]
 10:\\S¡ú\\Neg \\S
 11:\\S¡ú\\NP didnt \\VP[-FIN]
-12:\\VP[+FIN]¡ú\\VP[+FIN] \\Adv
+12:\\VP[+FIN]¡ú\\VP[+FIN] \\Adv \\Adv
 13:\\VP¡úwas \\VP[-PL]
 14:\\VP[-PL]¡ú\\Vt[-PL] \\PPby
 15:\\VP[-PL]¡ú\\Vdt[-PL] \\PPto \\PPby
