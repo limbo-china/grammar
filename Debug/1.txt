@@ -1,0 +1,24 @@
+grammer
+syntax01:\\S¡ú\\NP[-PL] \\VP[+FIN, -PL]
+02:\\VP[-FIN]¡ú\\Vi[-FIN]
+03:\\VP[-FIN]¡ú\\Vt[-FIN] \\NP
+04:\\VP[-FIN]¡ú\\Vdt[-FIN] \\NP1 \\NP2
+05:\\VP[-FIN]¡ú\\Vdt[-FIN] \\NP \\PPto
+06:\\NP¡ú\\Npr
+07:\\NP¡úthe \\N
+08:\\PPto¡úto \\NP
+09:\\S¡úit \\V0[+FIN]
+10:\\S¡ú\\Neg \\S
+
+12:\\S¡ú\\NP didnt \\VP[-FIN]
+13:\\VP[-FIN]¡ú\\VP[-FIN] \\Adv
+
+15:\\VP¡úwas \\VP[-FIN]
+16:\\VP[-FIN]¡ú\\Vt[-FIN] \\PPby
+17:\\VP[-FIN]¡ú\\Vdt[-FIN] \\PPto \\PPby
+18:\\VP[-FIN]¡ú\\Vdt[-FIN] \\NP \\PPby
+19:\\PPby¡úby \\NP
+20:\\Vt[-FIN]¡ú{kicked, loathed, poisoned, read, eaten, liked}
+21:\\Vdt[-FIN]¡ú{given}
+22:\\Adv¡ú{slowly, happily, stupidly, crazily}
+23:\\Neg¡ú{it is not the case that}
