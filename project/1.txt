@@ -7,7 +7,7 @@ syntax
 124:\\Vi[-FIN]¡ú\\Vt[-FIN] \\NP
 125:\\Vt[-FIN]¡ú\\Vt[-FIN] \\NP
 126:\\NP¡ú\\Vt[-FIN] \\NP \\PPby
-127:\\S¡ú\\Vt[-FIN] \\NP \\PPby
+128:\\S¡ú\\Vt[-FIN] \\NP \\PPby
 
 vocabulary
 25:\\PPby¡úby by by by by by by

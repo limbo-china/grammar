@@ -25,15 +25,11 @@
 #define Interpreted 1
 #define Interpretation 2
 #define TagSize 15
-#define IdSize  100
-#define IdNumSize 1000
-#define TermSize  100
+#define Size  100
 
 FILE *infile;
 char *tag=(char*)malloc(TagSize*sizeof(char));
 char ch;
-char id_c[IdNumSize][IdSize];
-int id_num = 0;
 int line = 1;
 int status = Syntax;
 int inter = Interpreted;
@@ -43,12 +39,14 @@ bool S = false;
 
 typedef struct t
 {
-	char term_c[TermSize];
+	char item_c[Size];
 	struct t *next;
 }*link;
 
-link f_term = (link)malloc(sizeof(struct t));
-link l_term = (link)malloc(sizeof(struct t));
+
+link f_term_list= (link)malloc(sizeof(struct t));
+link l_term_list= (link)malloc(sizeof(struct t));
+link id_list = (link)malloc(sizeof(struct t));
 
 void scanner();
 bool grammertag();	//grammer tag检测
@@ -152,7 +150,7 @@ bool vocabutag()
 }
 bool term() //term检测函数定义
 {
-	char *term_c = (char*)malloc(TermSize*sizeof(char));
+	char *term_c = (char*)malloc(Size*sizeof(char));
 	char *c = term_c;
 	ch = fgetc(infile);
 	if (ch != Back_Slash)
@@ -296,16 +294,16 @@ bool term() //term检测函数定义
 	}
 	if (inter == Interpreted)
 	{
-		if (!is_exist(f_term, term_c))
+		if (!is_exist(f_term_list, term_c))
 		{
-			insert(f_term, term_c); f_term_num++;
+			insert(f_term_list, term_c); f_term_num++;
 		}
 	}
 	else
 	{
-		if (!is_exist(l_term, term_c))
+		if (!is_exist(l_term_list, term_c))
 		{
-			insert(l_term, term_c); l_term_num++;
+			insert(l_term_list, term_c); l_term_num++;
 		}
 	}
 	return true;
@@ -314,8 +312,8 @@ bool term() //term检测函数定义
 }
 bool id()
 {
-	char *c = id_c[id_num];
-	int i;
+	char *id_c = (char*)malloc(Size*sizeof(char));
+	char *c = id_c;
 	if (ch >= '0'&&ch <= '9')
 	{
 		*c++ = ch;
@@ -341,15 +339,15 @@ bool id()
 			return false;
 		}
 		*c = '\0';
-		for (i = 0; i < id_num; i++)
+		if (!is_exist(id_list, id_c))
 		{
-			if (!strcmp(id_c[i], id_c[id_num]))
-			{
-				printf("error: the id is not unique\n");
-				return false;
-			}
+			insert(id_list, id_c);
 		}
-		id_num++;
+		else
+		{
+			printf("error: the id is not unique\n");
+			return false;
+		}
 	}
 	else
 	{
@@ -477,7 +475,7 @@ bool is_exist(link q, char *term)
 {
 	while (q != NULL)
 	{
-		if (!strcmp(q->term_c, term))
+		if (!strcmp(q->item_c, term))
 			return true;
 		q = q->next;
 	}
@@ -486,7 +484,7 @@ bool is_exist(link q, char *term)
 void insert(link q, char *term)
 {
 	link temp = (link)malloc(sizeof(struct t));
-	strcpy(temp->term_c, term);
+	strcpy(temp->item_c, term);
 	if (q->next == NULL)
 	{
 		q->next = temp;
@@ -505,7 +503,7 @@ bool is_equal(link p, link q)
 	p = p->next;
 	while (p != NULL)
 	{
-		if (!is_exist(q, p->term_c))
+		if (!is_exist(q, p->item_c))
 			return false;
 		p = p->next;
 	}
@@ -513,16 +511,16 @@ bool is_equal(link p, link q)
 }
 void scanner(FILE *infile)
 {
-	f_term->next = NULL;
-	l_term->next = NULL;
+	f_term_list->next = NULL;
+	l_term_list->next = NULL;
+	id_list->next = NULL;
 	ch = fgetc(infile);
 	if (!grammertag())	//检测grammertag
 		return;
 	if (!syntaxtag())	//检测syntaxtag
 		return;
-	while (ch != EOF)
+	do
 	{
-		
 		if (!id())
 			return ;	//检测 id;
 
@@ -542,7 +540,7 @@ void scanner(FILE *infile)
 
 		//开始检测 interpretation；		
 
-		if (status == Syntax)	
+		if (status == Syntax)	 //若 未发现 vocabulary tag;
 		{
 			if (!syn_inter())	//检测 syntax interpretation;
 				return;
@@ -555,12 +553,12 @@ void scanner(FILE *infile)
 			{
 				line++;
 				ch = fgetc(infile);
-				if (ch == 'v')
-				if (!vocabutag())
+				if (ch == 'v')			//检测是否为vocabulary tag;
+				if (!vocabutag())          
 					return;
 			}
 		}
-		else if (status == Vocabulary_tag)
+		else if (status == Vocabulary_tag)  //若发现 vocabulary tag;
 		{
 			if (!voc_inter())	//检测 vocabulary interpretation;
 				return;
@@ -578,18 +576,18 @@ void scanner(FILE *infile)
 		}
 
 		inter = Interpreted;	//interpretation字段结束;
-	}
-	if (status != Vocabulary_rule)
+	} while (ch != EOF);
+	if (status != Vocabulary_rule) //若 vocabulary 为空;
 	{
 		printf("error: missing vocabulary\n");
 		return;
 	}
-	if (S == false)
+	if (S == false)				//若 未发现S;
 	{
 		printf("error: missing term \'S\' interpreted\n");
 		return;
 	}
-	if (!is_equal(f_term, l_term))
+	if (!is_equal(f_term_list, l_term_list)) //若f_term和l_term 不相等;
 	{
 		printf("error: all terms occur are not interpreted or related to an interpretation\n");
 		return;
