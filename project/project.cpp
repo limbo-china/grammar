@@ -1,5 +1,4 @@
 
-
 #include "stdafx.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -8,6 +7,7 @@
 
 #define Is_Interpreted_As_First -95
 #define Is_Interpreted_As_Second -6
+//#define Is_Interpreted_As_Third -110
 #define Back_Slash  '\\'
 #define Blank_Space  ' '
 #define Left_Square_Bracket '['
@@ -22,18 +22,33 @@
 #define Syntax 1
 #define Vocabulary_tag 2
 #define Vocabulary_rule 3
+#define Interpreted 1
+#define Interpretation 2
 #define TagSize 15
 #define IdSize  100
 #define IdNumSize 1000
+#define TermSize  100
 
+FILE *infile;
 char *tag=(char*)malloc(TagSize*sizeof(char));
 char ch;
 char id_c[IdNumSize][IdSize];
-FILE *infile;
 int id_num = 0;
 int line = 1;
 int status = Syntax;
-	
+int inter = Interpreted;
+int f_term_num = 0;
+int l_term_num = 0;
+bool S = false;
+
+typedef struct t
+{
+	char term_c[TermSize];
+	struct t *next;
+}*link;
+
+link f_term = (link)malloc(sizeof(struct t));
+link l_term = (link)malloc(sizeof(struct t));
 
 void scanner();
 bool grammertag();	//grammer tag检测
@@ -44,6 +59,11 @@ bool id();			//id检测
 bool interpret();	//‘→’检测
 bool syn_inter();	//syntax interpretation检测
 bool voc_inter();	//vocabulary interpretation检测
+bool is_exist(link q,char *term);  //判断term是否存在
+void insert(link q, char *term); //将term插入表中
+bool is_equal(link p, link q); //判断两个集合是否相等
+
+
 
 bool grammertag()
 {
@@ -132,6 +152,8 @@ bool vocabutag()
 }
 bool term() //term检测函数定义
 {
+	char *term_c = (char*)malloc(TermSize*sizeof(char));
+	char *c = term_c;
 	ch = fgetc(infile);
 	if (ch != Back_Slash)
 	{
@@ -147,17 +169,20 @@ bool term() //term检测函数定义
 
 	do //检测id_character；
 	{
+		*c++ = ch;
 		ch = fgetc(infile);
 	} while ((ch >= '0'&&ch <= '9') || (ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'));
 
 	if (ch == Left_Square_Bracket) //检测left_square_bracket；
 	{
+		*c++ = ch;
 		ch = fgetc(infile);
 		if (ch != ExplicationN && ch != ExplicationP)
 		{
 			printf("error: missing a '-'or'+' behind '[' \n");
 			return false;
 		}
+		*c++ = ch;
 		ch = fgetc(infile);
 		if (ch != 'P'&&ch != 'F')
 		{
@@ -166,27 +191,32 @@ bool term() //term检测函数定义
 		}
 		if (ch == 'P')
 		{
+			*c++ = ch;
 			ch = fgetc(infile);
 			if (ch != 'L')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
+			*c++ = ch;
 		}
 		else if (ch == 'F')
 		{
+			*c++ = ch;
 			ch = fgetc(infile);
 			if (ch != 'I')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
+			*c++ = ch;
 			ch = fgetc(infile);
 			if (ch != 'N')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
+			*c++ = ch;
 		}
 		ch = fgetc(infile);
 		while (ch != Right_Square_Bracket) //当还没遇到 Right_Square_Bracket时；
@@ -196,6 +226,7 @@ bool term() //term检测函数定义
 				printf("error: missing a ',' or a ']'\n");
 				return false;
 			}
+			*c++ = ch;
 			ch = fgetc(infile);
 			if (ch != ExplicationN&&ch != ExplicationP)
 			{
@@ -206,14 +237,16 @@ bool term() //term检测函数定义
 				}
 				else
 				{
+					*c++ = ch;
 					ch = fgetc(infile);
 					if (ch != ExplicationN&&ch != ExplicationP)
 					{
 						printf("error: missing a '-'or'+' behind blankspace\n");
 						return false;
 					}
-				}
+				}	
 			}
+			*c++ = ch;
 			ch = fgetc(infile);
 			if (ch != 'P'&&ch != 'F')
 			{
@@ -222,31 +255,58 @@ bool term() //term检测函数定义
 			}
 			if (ch == 'P')
 			{
+				*c++ = ch;
 				ch = fgetc(infile);
 				if (ch != 'L')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
+				*c++ = ch;
 			}
 			else if (ch == 'F')
 			{
+				*c++ = ch;
 				ch = fgetc(infile);
 				if (ch != 'I')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
+				*c++ = ch;
 				ch = fgetc(infile);
 				if (ch != 'N')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
+				*c++ = ch;
 			}
 			ch = fgetc(infile);
 		}
+		*c++ = ch;
 		ch = fgetc(infile);
+	}
+	*c = '\0';
+	if (!strcmp(term_c, "S"))
+	{
+			if(status==Syntax&&inter==Interpreted)
+				S = true; 
+			return true;
+	}
+	if (inter == Interpreted)
+	{
+		if (!is_exist(f_term, term_c))
+		{
+			insert(f_term, term_c); f_term_num++;
+		}
+	}
+	else
+	{
+		if (!is_exist(l_term, term_c))
+		{
+			insert(l_term, term_c); l_term_num++;
+		}
 	}
 	return true;
 	//遇到 Right_Square_Bracket跳出循环；
@@ -313,6 +373,12 @@ bool interpret()
 		printf("error: '→' expected behind a term \n");
 		return false;
 	}
+	/*ch = fgetc(infile);
+	if (ch != Is_Interpreted_As_Third)
+	{
+		printf("error: '→' expected behind a term \n");
+		return false;
+	}*/
 	ch = fgetc(infile);
 	return true;
 }
@@ -407,10 +473,48 @@ bool voc_inter()
 	ch = fgetc(infile);
 	return true;
 }
-
+bool is_exist(link q, char *term)
+{
+	while (q != NULL)
+	{
+		if (!strcmp(q->term_c, term))
+			return true;
+		q = q->next;
+	}
+	return false;
+}
+void insert(link q, char *term)
+{
+	link temp = (link)malloc(sizeof(struct t));
+	strcpy(temp->term_c, term);
+	if (q->next == NULL)
+	{
+		q->next = temp;
+		temp->next = NULL;
+	}
+	else
+	{
+		temp->next = q->next;
+		q->next = temp;
+	}
+}
+bool is_equal(link p, link q)
+{
+	if (f_term_num != l_term_num)
+		return false;
+	p = p->next;
+	while (p != NULL)
+	{
+		if (!is_exist(q, p->term_c))
+			return false;
+		p = p->next;
+	}
+	return true;
+}
 void scanner(FILE *infile)
 {
-	
+	f_term->next = NULL;
+	l_term->next = NULL;
 	ch = fgetc(infile);
 	if (!grammertag())	//检测grammertag
 		return;
@@ -433,9 +537,12 @@ void scanner(FILE *infile)
 		
 		if (!interpret())
 			return;		 //检测‘→’;
-		
-							//开始检测 interpretation；
-		if (status == Syntax)
+
+		inter = Interpretation;   //进入interpretation字段;
+
+		//开始检测 interpretation；		
+
+		if (status == Syntax)	
 		{
 			if (!syn_inter())	//检测 syntax interpretation;
 				return;
@@ -469,13 +576,27 @@ void scanner(FILE *infile)
 				}
 			}
 		}
+
+		inter = Interpreted;	//interpretation字段结束;
 	}
-	if (status == Vocabulary_rule)
-		printf("true\n");
-	else
+	if (status != Vocabulary_rule)
+	{
 		printf("error: missing vocabulary\n");
+		return;
+	}
+	if (S == false)
+	{
+		printf("error: missing term \'S\' interpreted\n");
+		return;
+	}
+	if (!is_equal(f_term, l_term))
+	{
+		printf("error: all terms occur are not interpreted or related to an interpretation\n");
+		return;
+	}
+	printf("true\n");
 }
-int main(int argc, char *argv[])
+int main()
 {
 		
 		char *fname = "1.txt";
