@@ -24,7 +24,7 @@
 #define Vocabulary_rule 3
 #define Interpreted 1
 #define Interpretation 2
-#define TagSize 15
+#define TagSize 11
 #define Size  100
 
 FILE *infile;
@@ -66,56 +66,58 @@ bool is_equal(link p, link q); //判断两个集合是否相等
 bool grammertag()
 {
 	char *t=tag;
+	int cnum = 0;
 	if (ch != 'g')
 	{
 		printf("error:tag \'grammer\'expected\n");
 		return false;
 	}
-	while (ch >= 97 && ch <= 122)
+	while (ch != '\n')
 	{
-		*t++ = ch;
+		*t++ = ch; cnum++;
 		ch = fgetc(infile);
 	}
-	if (ch != '\n')
+	*t = '\0';
+	if (cnum>TagSize)
 	{
-		printf("error: a eol expected behind a tag\n");
+		printf("error: the length of a tag is not allowed to be larger than %d\n", TagSize);
 		return false;
 	}
-	line++;
-	*t = '\0';
 	if (strcmp(tag, "grammer"))
 	{
 		printf("error: tag \'grammer\'expected\n");
 		return false;
 	}
+	line++;
 	ch = fgetc(infile);
 	return true;
 }
 bool syntaxtag()
 {
 	char *t = tag;
+	int cnum = 0;
 	if (ch != 's')
 	{
 		printf("error:tag \'syntax\'expected\n");
 		return false;
 	}
-	while (ch >= 97 && ch <= 122)
+	while (ch != '\n')
 	{
-		*t++ = ch;
+		*t++ = ch; cnum++;
 		ch = fgetc(infile);
 	}
-	if (ch != '\n')
+	*t = '\0';
+	if (cnum>TagSize)
 	{
-		printf("error: a eol expected behind a tag\n");
+		printf("error: the length of a tag is not allowed to be larger than %d\n", TagSize);
 		return false;
 	}
-	line++;
-	*t = '\0';
 	if (strcmp(tag, "syntax"))
 	{
 		printf("error: tag \'syntax\'expected\n");
 		return false;
 	}
+	line++;
 	ch = fgetc(infile);
 	return true;
 }
@@ -152,6 +154,7 @@ bool term() //term检测函数定义
 {
 	char *term_c = (char*)malloc(Size*sizeof(char));
 	char *c = term_c;
+	int cnum = 0;
 	ch = fgetc(infile);
 	if (ch != Back_Slash)
 	{
@@ -167,20 +170,20 @@ bool term() //term检测函数定义
 
 	do //检测id_character；
 	{
-		*c++ = ch;
+		*c++ = ch; cnum++;
 		ch = fgetc(infile);
 	} while ((ch >= '0'&&ch <= '9') || (ch >= 'A'&&ch <= 'Z') || (ch >= 'a'&&ch <= 'z'));
 
 	if (ch == Left_Square_Bracket) //检测left_square_bracket；
 	{
-		*c++ = ch;
+		*c++ = ch; cnum++;
 		ch = fgetc(infile);
 		if (ch != ExplicationN && ch != ExplicationP)
 		{
 			printf("error: missing a '-'or'+' behind '[' \n");
 			return false;
 		}
-		*c++ = ch;
+		*c++ = ch; cnum++;
 		ch = fgetc(infile);
 		if (ch != 'P'&&ch != 'F')
 		{
@@ -189,32 +192,32 @@ bool term() //term检测函数定义
 		}
 		if (ch == 'P')
 		{
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch != 'L')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
-			*c++ = ch;
+			*c++ = ch; cnum++;
 		}
 		else if (ch == 'F')
 		{
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch != 'I')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch != 'N')
 			{
 				printf("error: 'FIN' or 'PL' expected \n");
 				return false;
 			}
-			*c++ = ch;
+			*c++ = ch; cnum++;
 		}
 		ch = fgetc(infile);
 		while (ch != Right_Square_Bracket) //当还没遇到 Right_Square_Bracket时；
@@ -224,7 +227,7 @@ bool term() //term检测函数定义
 				printf("error: missing a ',' or a ']'\n");
 				return false;
 			}
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch != ExplicationN&&ch != ExplicationP)
 			{
@@ -235,16 +238,16 @@ bool term() //term检测函数定义
 				}
 				else
 				{
-					*c++ = ch;
+					*c++ = ch; cnum++;
 					ch = fgetc(infile);
 					if (ch != ExplicationN&&ch != ExplicationP)
 					{
 						printf("error: missing a '-'or'+' behind blankspace\n");
 						return false;
 					}
-				}	
+				}
 			}
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch != 'P'&&ch != 'F')
 			{
@@ -253,44 +256,49 @@ bool term() //term检测函数定义
 			}
 			if (ch == 'P')
 			{
-				*c++ = ch;
+				*c++ = ch; cnum++;
 				ch = fgetc(infile);
 				if (ch != 'L')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
-				*c++ = ch;
+				*c++ = ch; cnum++;
 			}
 			else if (ch == 'F')
 			{
-				*c++ = ch;
+				*c++ = ch; cnum++;
 				ch = fgetc(infile);
 				if (ch != 'I')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
-				*c++ = ch;
+				*c++ = ch; cnum++;
 				ch = fgetc(infile);
 				if (ch != 'N')
 				{
 					printf("error: 'FIN' or 'PL' expected \n");
 					return false;
 				}
-				*c++ = ch;
+				*c++ = ch; cnum++;
 			}
 			ch = fgetc(infile);
 		}
-		*c++ = ch;
+		*c++ = ch; cnum++;
 		ch = fgetc(infile);
 	}
 	*c = '\0';
+	if (cnum>Size)
+	{
+		printf("error: the length of a term is not allowed to be larger than %d\n", Size);
+		return false;
+	}
 	if (!strcmp(term_c, "S"))
 	{
-			if(status==Syntax&&inter==Interpreted)
-				S = true; 
-			return true;
+		if (status == Syntax&&inter == Interpreted)
+			S = true;
+		return true;
 	}
 	if (inter == Interpreted)
 	{
@@ -314,17 +322,18 @@ bool id()
 {
 	char *id_c = (char*)malloc(Size*sizeof(char));
 	char *c = id_c;
+	int cnum = 0;
 	if (ch >= '0'&&ch <= '9')
 	{
-		*c++ = ch;
+		*c++ = ch; cnum++;
 		ch = fgetc(infile);
 		while ((ch >= '0'&&ch <= '9') || ch == Hyphen)
 		{
-			*c++ = ch;
+			*c++ = ch; cnum++;
 			ch = fgetc(infile);
 			if (ch == Hyphen)
 			{
-				*c++ = ch;
+				*c++ = ch; cnum++;
 				ch = fgetc(infile);
 				if (ch < '0' || ch > '9')
 				{
@@ -335,10 +344,15 @@ bool id()
 		}
 		if (ch != Colon)
 		{
-			printf("error: missing a ':' \n");
+			printf("error: ':' expected behind digit \n");
 			return false;
 		}
 		*c = '\0';
+		if (cnum > Size)
+		{
+			printf("error: the length of a id is not allowed to be larger than %d\n", Size);
+			return false;
+		}
 		if (!is_exist(id_list, id_c))
 		{
 			insert(id_list, id_c);
@@ -558,7 +572,7 @@ void scanner(FILE *infile)
 					return;
 			}
 		}
-		else if (status == Vocabulary_tag)  //若发现 vocabulary tag;
+		else if (status == Vocabulary_tag||status==Vocabulary_rule)  //若标记已发现 vocabulary tag;
 		{
 			if (!voc_inter())	//检测 vocabulary interpretation;
 				return;
